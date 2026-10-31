@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="sidebar.css"/>
+  </head>
+  <body>
+    <!-- The main chat interface -->
+    <div id="chat-container">
+      <header id="sidebar-header">
+        <div class="header-left">
+          <div class="title-dropdown">
+            <h1 id="title-text">SmritiAI</h1>
+            <button id="dropdown-toggle" class="dropdown-arrow" title="Menu">▼</button>
+            <div id="dropdown-menu" class="dropdown-menu hidden">
+              <div class="dropdown-item" data-action="index-stats">
+                <span class="dropdown-item-text">Index Stats</span>
+                <span class="dropdown-item-status" id="stats-status"></span>
+              </div>
+              <div class="dropdown-item" data-action="settings">
+                <span class="dropdown-item-text">Settings</span>
+                <span class="dropdown-item-status" id="settings-status"></span>
+              </div>
+              <div class="dropdown-item" data-action="export-data">
+                <span class="dropdown-item-text">Export Data</span>
+                <span class="dropdown-item-status" id="export-status"></span>
+              </div>
+              <div class="dropdown-item" data-action="import-data">
+                <span class="dropdown-item-text">Import Data</span>
+                <span class="dropdown-item-status" id="import-status"></span>
+              </div>
+              <div class="dropdown-item" data-action="clear-data">
+                <span class="dropdown-item-text">Clear All Data</span>
+                <span class="dropdown-item-status" id="clear-status"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button id="theme-toggle-btn" title="Toggle Theme">🌙</button>
+      </header>
+      <div id="chat-messages">
+        <div class="message received">Search your memories.</div>
+      </div>
+      <form id="chat-form">
+        <div class="input-container">
+          <input type="text" id="message-input" placeholder="Type a message or / for commands..." autocomplete="off">
+          <!-- Command dropdown menu -->
+          <div id="command-dropdown" class="command-dropdown hidden">
+            <div class="command-item" data-command="/clear">
+              <span class="command-name">/clear</span>
+              <span class="command-desc">Clear chat history</span>
+            </div>
+            <div class="command-item" data-command="/stats">
+              <span class="command-name">/stats</span>
+              <span class="command-desc">Show index statistics</span>
+            </div>
+            <div class="command-item" data-command="/settings">
+              <span class="command-name">/settings</span>
+              <span class="command-desc">Open settings</span>
+            </div>
+          </div>
+        </div>
+        <button type="submit">Send</button>
+      </form>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Settings</h2>
+          <button id="close-settings" class="close-button">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="settings-section">
+            <h3>Search Settings</h3>
+            <div class="setting-item">
+              <label for="search-result-count">Number of search results (k):</label>
+              <input type="number" id="search-result-count" min="1" max="20" value="5">
+              <span class="setting-help">How many pages to return per search</span>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3>HNSW Parameters</h3>
+            <div class="setting-item">
+              <label for="hnsw-ef">ef (search quality):</label>
+              <input type="number" id="hnsw-ef" min="10" max="1000" value="200">
+              <span class="setting-help">Higher values = better accuracy, slower search</span>
+            </div>
+            <div class="setting-item">
+              <label for="hnsw-m">M (connections):</label>
+              <input type="number" id="hnsw-m" min="4" max="64" value="16">
+              <span class="setting-help">Higher values = better accuracy, more memory</span>
+            </div>
+            <div class="setting-item">
+              <label for="max-elements">Max elements:</label>
+              <input type="number" id="max-elements" min="1000" max="100000" value="10000">
+              <span class="setting-help">Maximum pages that can be indexed</span>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3>Indexing Options</h3>
+            <div class="setting-item">
+              <label>
+                <input type="checkbox" id="auto-index">
+                Auto-index new pages
+              </label>
+              <span class="setting-help">Automatically add new pages to search index</span>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3>Index Management</h3>
+            <div class="setting-item">
+              <button id="rebuild-index-btn" class="btn-secondary">
+                <span id="rebuild-index-text">Rebuild Index</span>
+                <span id="rebuild-index-spinner" class="hidden"> 🔄</span>
+              </button>
+              <span class="setting-help">Rebuild the search index from all saved pages</span>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3>Browser History Processing</h3>
+            <div class="setting-item">
+              <label for="history-time-range">Process time range:</label>
+              <select id="history-time-range">
+                <option value="week" selected>Last Week</option>
+                <option value="month">Last Month</option>
+                <option value="6months">Last 6 Months</option>
+                <option value="year">Last Year</option>
+                <option value="2years">Last 2 Years</option>
+                <option value="all">All Time</option>
+              </select>
+              <span class="setting-help">Select the time period to process existing browser history</span>
+            </div>
+            <div class="setting-item">
+              <button id="process-history-btn" class="btn-secondary">
+                <span id="process-history-text">Process Browser History</span>
+                <span id="process-history-spinner" class="hidden"> �</span>
+              </button>
+              <span class="setting-help">Generate embeddings for your existing browser history to make it searchable</span>
+            </div>
+            <div class="setting-item" id="history-progress-container" style="display: none;">
+              <div class="progress-bar">
+                <div id="history-progress-fill" class="progress-fill"></div>
+              </div>
+              <span id="history-progress-text" class="progress-text">Processing...</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="save-settings" class="btn-primary">Save Settings</button>
+          <button id="reset-settings" class="btn-secondary">Reset to Defaults</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmation-modal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="confirm-title">Confirm Action</h2>
+          <button id="close-confirm" class="close-button">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p id="confirm-message">Are you sure you want to proceed?</p>
+        </div>
+        <div class="modal-footer">
+          <button id="confirm-yes" class="btn-danger">Yes</button>
+          <button id="confirm-no" class="btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden file input for import -->
+    <input type="file" id="import-file-input" accept=".json" style="display: none;">
+
+    <script src="sidebar/sidebar.js" type = "module"></script>
+  </body>
+</html>
